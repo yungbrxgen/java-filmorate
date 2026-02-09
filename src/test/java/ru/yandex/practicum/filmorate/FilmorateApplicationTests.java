@@ -43,7 +43,7 @@ public class FilmorateApplicationTests {
         f.setDuration(120);
         return f;
     }
-    
+
     @Test
     void contextLoads() {
     }
