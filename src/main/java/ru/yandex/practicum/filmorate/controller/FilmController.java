@@ -31,7 +31,7 @@ public class FilmController {
                 .mapToLong(id -> id)
                 .max()
                 .orElse(0);
-        return  ++currentMaxId;
+        return ++currentMaxId;
     }
 
     private void validateFilm(Film film) {

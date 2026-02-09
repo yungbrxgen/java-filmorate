@@ -90,7 +90,7 @@ public class FilmorateApplicationTests {
         updated.setEmail("new@example.com");
         updated.setLogin("newlogin");
         updated.setName("New Name");
-        updated.setBirthday(LocalDate.of(1995, 5,5));
+        updated.setBirthday(LocalDate.of(1995, 5, 5));
 
         User result = userController.update(updated);
 
@@ -162,7 +162,7 @@ public class FilmorateApplicationTests {
         upd.setName("Updated");
         upd.setDescription("Updated desc");
         upd.setDuration(90);
-        upd.setReleaseDate(LocalDate.of(2010, 2,2));
+        upd.setReleaseDate(LocalDate.of(2010, 2, 2));
 
         Film result = filmController.update(upd);
 
@@ -172,7 +172,7 @@ public class FilmorateApplicationTests {
     }
 
     @Test
-    public void updateFilmNotFoundThrowsNotFound () {
+    public void updateFilmNotFoundThrowsNotFound() {
         Film f = makeValidFilm();
         f.setId(999L);
 
