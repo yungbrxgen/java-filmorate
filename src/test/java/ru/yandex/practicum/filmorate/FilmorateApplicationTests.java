@@ -115,7 +115,7 @@ public class FilmorateApplicationTests {
 
         assertNotNull(created);
         assertNotNull(created.getId());
-        assertEquals(1l, created.getId());
+        assertEquals(1L, created.getId());
         Collection<Film> all = filmController.getAll();
         assertEquals(1, all.size());
     }

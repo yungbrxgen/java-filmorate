@@ -44,7 +44,7 @@ public class FilmController {
             throw new ValidationsException("Название фильма не может быть пустым");
         }
         if (film.getDescription().length() > 200) {
-            log.warn("Валидация: описание слишком длинное: lentgth={}", film.getDescription().length());
+            log.warn("Валидация: описание слишком длинное: length={}", film.getDescription().length());
             throw new ValidationsException("Максимальная длина описания - 200 символов");
         }
         if (film.getReleaseDate().isBefore(MINIMUM_DATE)) {

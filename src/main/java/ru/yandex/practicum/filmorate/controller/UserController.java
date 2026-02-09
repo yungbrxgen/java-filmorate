@@ -36,10 +36,12 @@ public class UserController {
         if (!user.getEmail().contains("@")) {
             log.warn("Валидация: email не содержит @: {}", user.getEmail());
             throw new ValidationsException("Имейл должен содержать символ '@'");
-        } else if (user.getEmail() == null || user.getEmail().isBlank()) {
+        }
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.warn("Валидация: пустой email");
             throw new ValidationsException("Имейл не может быть пустым");
-        } else if (user.getBirthday().isAfter(LocalDate.now())) {
+        }
+        if (user.getBirthday().isAfter(LocalDate.now())) {
             log.warn("Валидация: дата рождения не может быть в будущем");
             throw new ValidationsException("Дата рождения не может быть в будущем");
         }
