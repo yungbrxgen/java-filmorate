@@ -25,7 +25,7 @@ public class FilmController {
         return films.values();
     }
 
-    private long getNextId() {
+    private Long getNextId() {
         long currentMaxId = films.keySet()
                 .stream()
                 .mapToLong(id -> id)
@@ -51,7 +51,7 @@ public class FilmController {
             log.warn("Валидация: дата релиза раньше минимальной: {}", film.getReleaseDate());
             throw new ValidationsException("Дата релиза не может быть раньше 28-го декабря 1895 года");
         }
-        if (film.getDuration() < 0) {
+        if (film.getDuration() <= 0) {
             log.warn("Валидация: отрицательная продолжительность:  {}", film.getDuration());
             throw new ValidationsException("Продолжительность фильма должна быть положительным числом");
         }

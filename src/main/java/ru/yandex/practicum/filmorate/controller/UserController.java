@@ -23,7 +23,7 @@ public class UserController {
         return users.values();
     }
 
-    private long getNextId() {
+    private Long getNextId() {
         long currentMaxId = users.keySet()
                 .stream()
                 .mapToLong(id -> id)
@@ -47,14 +47,20 @@ public class UserController {
         }
     }
 
+    public User validateUserIfNameIsEmpty(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            log.info("Имя для отображения не указано. Будет использован login={}", user.getLogin());
+            user.setName(user.getLogin());
+        }
+        return user;
+    }
+
     @PostMapping
     public User create(@RequestBody User newUser) {
         log.info("POST /users - создание пользователя: {}", newUser);
         validateUser(newUser);
+        validateUserIfNameIsEmpty(newUser);
 
-        if (newUser.getName() == null || newUser.getName().isBlank()) {
-            newUser.setName(newUser.getLogin());
-        }
         long id = getNextId();
         newUser.setId(id);
         users.put(id, newUser);
@@ -66,14 +72,11 @@ public class UserController {
     public User update(@RequestBody User user) {
         log.info("PUT /users - обновление пользователя id={}", user != null ? user.getId() : null);
         validateUser(user);
+        validateUserIfNameIsEmpty(user);
 
         if (!users.containsKey(user.getId())) {
             log.warn("Пользователь с id={} не найден", user.getId());
             throw new NotFoundException("Пользователь с ID = " + user.getId() + " не найден");
-        }
-
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
         }
 
         User oldUser = users.get(user.getId());
