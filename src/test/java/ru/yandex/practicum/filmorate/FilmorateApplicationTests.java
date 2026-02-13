@@ -40,7 +40,7 @@ public class FilmorateApplicationTests {
         f.setName("My Film");
         f.setDescription("ShortDescription");
         f.setReleaseDate(LocalDate.of(2000, 1, 1));
-        f.setDuration(120);
+        f.setDuration(120L);
         return f;
     }
 
@@ -147,7 +147,7 @@ public class FilmorateApplicationTests {
     @Test
     public void createFilmNegativeDurationThrowsException() {
         Film f = makeValidFilm();
-        f.setDuration(-10);
+        f.setDuration(-10L);
 
         assertThrows(ValidationsException.class, () -> filmController.create(f));
     }
@@ -161,7 +161,7 @@ public class FilmorateApplicationTests {
         upd.setId(created.getId());
         upd.setName("Updated");
         upd.setDescription("Updated desc");
-        upd.setDuration(90);
+        upd.setDuration(90L);
         upd.setReleaseDate(LocalDate.of(2010, 2, 2));
 
         Film result = filmController.update(upd);
