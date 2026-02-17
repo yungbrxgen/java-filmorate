@@ -11,7 +11,7 @@ import java.util.*;
 
 @Slf4j
 @Component
-public class ImMemoryFilmStorage implements FilmStorage {
+public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
     private static final LocalDate MINIMUM_DATE = LocalDate.of(1895, 12, 28);
 

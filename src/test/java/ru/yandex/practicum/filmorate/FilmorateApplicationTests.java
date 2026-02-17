@@ -2,36 +2,38 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationsException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
 public class FilmorateApplicationTests {
-    private UserStorage userStorage;
+    private InMemoryUserStorage userStorage;
     private UserService userService;
     private UserController userController;
-    private FilmStorage filmStorage;
+    private InMemoryFilmStorage filmStorage;
     private FilmService filmService;
     private FilmController filmController;
 
     @BeforeEach
     public void setUp() {
+        userStorage = new InMemoryUserStorage();
         userService = new UserService(userStorage);
         userController = new UserController(userService);
+
+        filmStorage = new InMemoryFilmStorage();
         filmService = new FilmService(filmStorage);
         filmController = new FilmController(filmService);
     }
@@ -178,7 +180,7 @@ public class FilmorateApplicationTests {
 
         assertEquals(created.getId(), result.getId());
         assertEquals("Updated", result.getName());
-        assertEquals(90, result.getDuration());
+        assertEquals(90L, result.getDuration());
     }
 
     @Test
@@ -186,6 +188,6 @@ public class FilmorateApplicationTests {
         Film f = makeValidFilm();
         f.setId(999L);
 
-        assertThrows(UserNotFoundException.class, () -> filmController.update(f));
+        assertThrows(FilmNotFoundException.class, () -> filmController.update(f));
     }
 }
