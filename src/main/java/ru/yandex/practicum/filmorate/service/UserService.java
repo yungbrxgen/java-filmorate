@@ -55,7 +55,15 @@ public class UserService {
         }
 
         User user = getUserById(userId);
+        if (user == null) {
+            log.warn("UserService: Попытка добавить друга у несуществующего пользователя с ID={}", userId);
+            throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
+        }
         User friend = getUserById(friendId);
+        if (friend == null) {
+            log.warn("UserService: Попытка добавить несуществующего друга ID={}", friendId);
+            throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
+        }
 
         user.getFriends().add(friendId);
         friend.getFriends().add(userId);
@@ -68,7 +76,16 @@ public class UserService {
 
     public void removeFriend(Long userId, Long friendId) {
         User user = getUserById(userId);
+        if (user == null) {
+            log.warn("UserService: Попытка удалить друга у несуществующего пользователя с ID={}", userId);
+            throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
+        }
+
         User friend = getUserById(friendId);
+        if (friend == null) {
+            log.warn("UserService: Попытка удалить несуществующего друга ID={}", friendId);
+            throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
+        }
 
         if (user.getFriends().contains(friendId)) {
             user.getFriends().remove(friendId);
@@ -91,6 +108,10 @@ public class UserService {
 
     public List<User> getFriends(Long userId) {
         User user = getUserById(userId);
+        if (user == null) {
+            log.warn("UserService: Попытка получить список друзей у несуществующего пользователя с ID={}", userId);
+            throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
+        }
         List<User> friendsList = new ArrayList<>();
         for (Long friendId : user.getFriends()) {
             friendsList.add(getUserById(friendId));
@@ -101,7 +122,16 @@ public class UserService {
 
     public List<User> getCommonFriends(Long userId, Long otherUserId) {
         User user = getUserById(userId);
+        if (user == null) {
+            log.warn("UserService: Попытка получить общих друзей у пользователя ID={}", userId);
+            throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
+        }
+
         User otherUser = getUserById(otherUserId);
+        if (otherUser == null) {
+            log.warn("UserService: Попытка получить общих друзей у пользователя ID={}", otherUserId);
+            throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
+        }
 
         Set<Long> userFriends = user.getFriends();
         Set<Long> otherUserFriends = otherUser.getFriends();
