@@ -60,7 +60,7 @@ public class UserController {
         userService.removeFriend(id, friendId);
     }
 
-    @GetMapping("/{id}/friends/")
+    @GetMapping("/{id}/friends")
     public List<User> getFriends(@PathVariable Long id) {
         log.info("GET /users/{id}/friends - запрос на получение списка друзей пользователя {}", id);
         return userService.getFriends(id);
