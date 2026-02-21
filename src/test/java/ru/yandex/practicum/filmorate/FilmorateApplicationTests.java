@@ -30,11 +30,12 @@ public class FilmorateApplicationTests {
     @BeforeEach
     public void setUp() {
         userStorage = new InMemoryUserStorage();
-        userService = new UserService(userStorage);
+        filmStorage = new InMemoryFilmStorage();
+
+        userService = new UserService(userStorage, filmStorage);
         userController = new UserController(userService);
 
-        filmStorage = new InMemoryFilmStorage();
-        filmService = new FilmService(filmStorage);
+        filmService = new FilmService(filmStorage, userStorage);
         filmController = new FilmController(filmService);
     }
 

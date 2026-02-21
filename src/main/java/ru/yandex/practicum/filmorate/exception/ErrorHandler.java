@@ -2,42 +2,40 @@ package ru.yandex.practicum.filmorate.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
-@ControllerAdvice
+@RestControllerAdvice
 public class ErrorHandler {
 
     public class ErrorResponse {
         private String error;
-        private String description;
 
-        public ErrorResponse(String error, String description) {
+        public ErrorResponse(String error) {
             this.error = error;
-            this.description = description;
         }
     }
 
-    @ExceptionHandler(ValidationsException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidation(ValidationsException e) {
-        log.warn("Validation error: {}", e.getMessage());
-        return new ErrorResponse("Ошибка валидации!", e.getMessage());
+    public ErrorResponse handleValidation(final ValidationsException e) {
+        log.warn("Ошибка валидации (400): {}", e.getMessage());
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFound(Exception e) {
-        log.warn("Not found: {}", e.getMessage());
-        return new ErrorResponse("Ошибка поиска!", e.getMessage());
+    public ErrorResponse handleNotFound(final RuntimeException e) {
+        log.warn("Объект не найден (404): {}", e.getMessage());
+        return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleInternal(Exception e) {
+    public ErrorResponse handleInternal(final Throwable e) {
         log.error("Необработанное исключение, перехваченное обработчиком", e);
-        return new ErrorResponse("Внутрення ошибка сервера", "Произошла непредвиденная ошибка.");
+        return new ErrorResponse("Произошла непредвиденная ошибка.");
     }
 }
