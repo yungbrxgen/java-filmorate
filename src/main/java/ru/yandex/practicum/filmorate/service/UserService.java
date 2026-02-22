@@ -79,33 +79,17 @@ public class UserService {
 
     public void removeFriend(Long userId, Long friendId) {
         User user = getUserById(userId);
-        if (user == null) {
-            log.warn("UserService: Попытка удалить друга у несуществующего пользователя с ID={}", userId);
-            throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
-        }
-
         User friend = getUserById(friendId);
-        if (friend == null) {
-            log.warn("UserService: Попытка удалить несуществующего друга ID={}", friendId);
-            throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
-        }
 
-        if (user.getFriends().contains(friendId)) {
-            user.getFriends().remove(friendId);
+        boolean removedFromUser = user.getFriends().remove(friendId);
+        boolean removedFromFriend = friend.getFriends().remove(userId);
+
+        if (removedFromUser || removedFromFriend) {
             userStorage.update(user);
-            log.info("UserService: Пользователь {} удалил из друзей пользователя {}.", userId, friendId);
-        } else {
-            log.warn("UserService: Попытка удалить несуществующего друга (userId={}, friendId={}", userId, friendId);
-            throw new UserNotFoundException("Пользователь с ID = " + friendId + " не найден в списке друзей");
-        }
-
-        if (friend.getFriends().contains(userId)) {
-            friend.getFriends().remove(userId);
             userStorage.update(friend);
-            log.info("UserService: Пользователь {} удалил из друзей пользователя {}.", friendId, userId);
+            log.info("Связь между {} и {} разорвана", userId, friendId);
         } else {
-            log.warn("UserService: Попытка удалить несуществующего друга(friendId={}, userId={}", friendId, userId);
-            throw new UserNotFoundException("Пользователь с ID = " + userId + "не найден в списке друзей");
+            log.info("Пользователи {} и {} не были друзьями, удалять нечего", userId, friendId);
         }
     }
 

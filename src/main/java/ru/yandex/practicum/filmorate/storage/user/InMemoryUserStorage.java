@@ -28,6 +28,10 @@ public class InMemoryUserStorage implements UserStorage {
             log.warn("Валидация: email не содержит @: {}", user.getEmail());
             throw new ValidationsException("Имейл должен содержать символ '@'");
         }
+        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+            log.warn("Валидация: некорректный логин");
+            throw new ValidationsException("Логин не может быть пустым или содержать пробелы");
+        }
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.warn("Валидация: пустой email");
             throw new ValidationsException("Имейл не может быть пустым");
@@ -64,10 +68,15 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User user) {
+        if (user.getId() == null) {
+            log.warn("InMemoryUserStorage: Попытка обновления пользователя с пустым ID");
+            throw new ValidationsException("ID пользователя не может быть пустым");
+        }
         if (!users.containsKey(user.getId())) {
             log.warn("InMemoryUserStorage: Попытка обновления несуществующего пользователя с ID={}", user.getId());
             throw new UserNotFoundException("Пользователь с ID = " + user.getId() + " не найден");
         }
+        
         validateUser(user);
         User userToUpdate = validateUserIfNameIsEmpty(user);
         users.put(userToUpdate.getId(), userToUpdate);
