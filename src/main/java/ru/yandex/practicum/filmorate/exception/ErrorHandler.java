@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.exception;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,7 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ErrorHandler {
 
-    public class ErrorResponse {
+    @Getter
+    public static class ErrorResponse {
         private String error;
 
         public ErrorResponse(String error) {
@@ -35,7 +37,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleInternal(final Throwable e) {
-        log.error("Необработанное исключение, перехваченное обработчиком", e);
+        log.error("Необработанное исключение (500): " , e);
         return new ErrorResponse("Произошла непредвиденная ошибка.");
     }
 }
