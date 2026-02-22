@@ -37,7 +37,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleInternal(final Throwable e) {
-        log.error("Необработанное исключение (500): " , e);
+        log.error("Необработанное исключение (500): ", e);
         return new ErrorResponse("Произошла непредвиденная ошибка.");
     }
 }
