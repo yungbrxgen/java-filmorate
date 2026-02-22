@@ -76,7 +76,7 @@ public class InMemoryUserStorage implements UserStorage {
             log.warn("InMemoryUserStorage: Попытка обновления несуществующего пользователя с ID={}", user.getId());
             throw new UserNotFoundException("Пользователь с ID = " + user.getId() + " не найден");
         }
-        
+
         validateUser(user);
         User userToUpdate = validateUserIfNameIsEmpty(user);
         users.put(userToUpdate.getId(), userToUpdate);
