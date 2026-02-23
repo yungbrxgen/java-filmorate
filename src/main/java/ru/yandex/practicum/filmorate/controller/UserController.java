@@ -21,7 +21,7 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<User> getAll() {
+    public List<User> getAll() {
         log.info("GET /users - возвращаем всех пользователей");
         return userService.getAllUsers();
     }

@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    private final UserService userService;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(FilmStorage filmStorage, UserService userService) {
         this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+        this.userService = userService;
     }
 
     public Film createFilm(Film film) {
@@ -53,8 +53,7 @@ public class FilmService {
     public void addLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
 
-        userStorage.getById(userId).orElseThrow(() ->
-                new UserNotFoundException("Пользователь с ID = " + userId + " не найден"));
+        userService.getUserById(userId);
 
         if (film.getLikes().contains(userId)) {
             log.warn("FilmService: Пользователь {} уже поставил лайк фильму {}", userId, filmId);
@@ -69,8 +68,7 @@ public class FilmService {
     public void removeLike(Long filmId, Long userId) {
         Film film = getFilmById(filmId);
 
-        userStorage.getById(userId).orElseThrow(() ->
-                new UserNotFoundException("Пользователь с ID = " + userId + " не найден"));
+        userService.getUserById(userId);
 
         if (!film.getLikes().contains(userId)) {
             log.warn("FilmService: Пользователь {} не ставил лайк фильму {}", userId, filmId);

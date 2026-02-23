@@ -19,12 +19,10 @@ import java.util.Set;
 @Service
 public class UserService {
     private final UserStorage userStorage;
-    private final FilmStorage filmStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage, FilmStorage filmStorage) {
+    public UserService(UserStorage userStorage) {
         this.userStorage = userStorage;
-        this.filmStorage = filmStorage;
     }
 
     public User createUser(User user) {
