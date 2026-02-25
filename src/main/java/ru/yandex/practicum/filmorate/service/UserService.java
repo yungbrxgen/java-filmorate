@@ -9,10 +9,9 @@ import ru.yandex.practicum.filmorate.exception.ValidationsException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -65,29 +64,27 @@ public class UserService {
             throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
         }
 
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
+        if (friend.getFriendshipStatus().containsKey(userId)) {
+            user.getFriendshipStatus().put(friendId, true);
+            friend.getFriendshipStatus().put(userId, true);
+            log.info("UserService: Дружба между {} и {} подтверждена", userId, friendId);
+        } else {
+            user.getFriendshipStatus().put(friendId, false);
+            log.info("UserService: Пользователь {} отправил запрос в друзья {}", userId, friendId);
+        }
 
         userStorage.update(user);
         userStorage.update(friend);
-
-        log.info("UserService: Пользователь {} добавил в друзья пользователя {}", userId, friendId);
     }
 
     public void removeFriend(Long userId, Long friendId) {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
 
-        boolean removedFromUser = user.getFriends().remove(friendId);
-        boolean removedFromFriend = friend.getFriends().remove(userId);
+        user.getFriendshipStatus().remove(friendId);
+        friend.getFriendshipStatus().remove(userId);
 
-        if (removedFromUser || removedFromFriend) {
-            userStorage.update(user);
-            userStorage.update(friend);
-            log.info("Связь между {} и {} разорвана", userId, friendId);
-        } else {
-            log.info("Пользователи {} и {} не были друзьями, удалять нечего", userId, friendId);
-        }
+        log.info("UserService: Пользователь {} удалил из друзей {}.", userId, friendId);
     }
 
     public List<User> getFriends(Long userId) {
@@ -96,12 +93,11 @@ public class UserService {
             log.warn("UserService: Попытка получить список друзей у несуществующего пользователя с ID={}", userId);
             throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
         }
-        List<User> friendsList = new ArrayList<>();
-        for (Long friendId : user.getFriends()) {
-            friendsList.add(getUserById(friendId));
-        }
-        log.debug("UserService: Получен список друзей для пользователя {}. Количество: {}", userId, friendsList.size());
-        return friendsList;
+
+        log.debug("UserService: Получение списка друзей для пользователя {}.", userId);
+        return user.getFriendshipStatus().keySet().stream()
+                .map(this::getUserById)
+                .collect(Collectors.toList());
     }
 
     public List<User> getCommonFriends(Long userId, Long otherUserId) {
@@ -117,18 +113,13 @@ public class UserService {
             throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
         }
 
-        Set<Long> userFriends = user.getFriends();
-        Set<Long> otherUserFriends = otherUser.getFriends();
+        Set<Long> userFriends = user.getFriendshipStatus().keySet();
+        Set<Long> otherUserFriends = otherUser.getFriendshipStatus().keySet();
 
-        Set<Long> commonFriendsIds = new HashSet<>(userFriends);
-        commonFriendsIds.retainAll(otherUserFriends);
-
-        List<User> commonFriendsList = new ArrayList<>();
-        for (Long friendId : commonFriendsIds) {
-            commonFriendsList.add(getUserById(friendId));
-        }
-        log.debug("UserService: Получен список общих друзей для пользователей {} и {}. Количество: {}",
-                userId, otherUserId, commonFriendsList.size());
-        return commonFriendsList;
+        log.debug("UserService: Получение списка общих друзей для пользователей {} и {}.", userId, otherUserId);
+        return userFriends.stream()
+                .filter(otherUserFriends::contains)
+                .map(this::getUserById)
+                .collect(Collectors.toList());
     }
 }

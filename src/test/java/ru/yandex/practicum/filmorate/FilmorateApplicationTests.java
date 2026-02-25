@@ -142,7 +142,7 @@ public class FilmorateApplicationTests {
     }
 
     @Test
-    public void createFilmLongDescriptionThrowsValidaion() {
+    public void createFilmLongDescriptionThrowsValidation() {
         Film f = makeValidFilm();
         f.setDescription("x".repeat(201));
 

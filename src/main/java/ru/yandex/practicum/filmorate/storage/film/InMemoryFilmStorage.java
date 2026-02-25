@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationsException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -44,6 +45,25 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (film.getDuration() <= 0) {
             log.warn("Валидация: отрицательная продолжительность:  {}", film.getDuration());
             throw new ValidationsException("Продолжительность фильма должна быть положительным числом");
+        }
+        if (film.getMpa() == null) {
+            log.warn("Валидация: MPA рейтинг не указан");
+            throw new ValidationsException("Рейтинг MPA не может быть null");
+        }
+        if (film.getMpa().getId() <= 0) {
+            log.warn("Валидация: некорректный ID рейтинга MPA: {}", film.getMpa().getId());
+            throw new ValidationsException("ID рейтинга MPA должен быть положительным числом");
+        }
+        if (film.getGenres() == null) {
+            log.info("Валидация: список жанров null, инициализируем пустой LinkedHashSet");
+            film.setGenres(new LinkedHashSet<>());
+        } else {
+            for (Genre genre : film.getGenres()) {
+                if (genre.getId() <= 0) {
+                    log.warn("Валидация: отрицательный ID жанра");
+                    throw new ValidationsException("ID жанра должен быть положительным числом");
+                }
+            }
         }
     }
 
