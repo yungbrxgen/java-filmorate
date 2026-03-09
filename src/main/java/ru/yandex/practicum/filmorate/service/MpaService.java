@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.MpaNotFountException;
+import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
@@ -20,16 +20,16 @@ public class MpaService {
     }
 
     public List<Mpa> getAllMpa() {
-        log.debug("Запрос на получние всех рейтингов MPA");
+        log.debug("Запрос на получение всех рейтингов MPA");
         return mpaStorage.getAll();
     }
 
-    public Mpa getMpaById(Integer id) {
+    public Mpa getMpaById(Long id) {
         log.debug("Запрос на получение рейтинга MPA о ID={}", id);
         return mpaStorage.getById(id)
                 .orElseThrow(() -> {
                     log.warn("Рейтинг MPA с ID={} не найден", id);
-                    return new MpaNotFountException("Рейтинг MPA с ID " + id + " не найден");
+                    return new MpaNotFoundException("Рейтинг MPA с ID " + id + " не найден");
                 });
     }
 }

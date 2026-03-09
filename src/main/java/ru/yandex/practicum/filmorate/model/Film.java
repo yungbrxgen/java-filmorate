@@ -28,9 +28,11 @@ public class Film {
 
     @NotNull(message = "Дата релиза не может быть пустой")
     private LocalDate releaseDate;
-    private Long duration;
 
     @Positive(message = "Продолжительность фильма должна быть положительной")
+    private Long duration;
+
+    @Builder.Default
     private Set<Long> likes = new HashSet<>();
 
     @NotNull(message = "Рейтинг MPA должен быть указан")

@@ -6,9 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
+import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationsException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -19,12 +24,18 @@ import java.util.List;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final MpaStorage mpaStorage;
+    private final GenreStorage genreStorage;
 
     @Autowired
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("userDbStorage") UserStorage userStorage) {
+                       @Qualifier("userDbStorage") UserStorage userStorage,
+                       @Qualifier("mpaDbStorage") MpaStorage mpaStorage,
+                       @Qualifier("genreDbStorage") GenreStorage genreStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.mpaStorage = mpaStorage;
+        this.genreStorage = genreStorage;
     }
 
     private void validateFilm(Film film) {
@@ -36,6 +47,20 @@ public class FilmService {
 
     public Film createFilm(Film film) {
         validateFilm(film);
+        if (film.getMpa() != null && mpaStorage.getById(film.getMpa().getId()).isEmpty()) {
+            log.warn("Ошибка при поиске MPA рейтинга");
+            throw new MpaNotFoundException("MPA рейтинг с ID " + film.getMpa().getId() + " не найден.");
+        }
+
+        if (film.getGenres() != null) {
+            for (Genre genre : film.getGenres()) {
+                if (genreStorage.getById(genre.getId()).isEmpty()) {
+                    log.warn("Ошибка при поиске жанра");
+                    throw new GenreNotFoundException("Жанр с ID " + genre.getId() + " не найден.");
+                }
+            }
+        }
+
         log.info("Добавление нового фильма: {}", film.getName());
         return filmStorage.save(film);
     }
@@ -52,7 +77,7 @@ public class FilmService {
     }
 
     public Film getFilmById(Long id) {
-        log.debug("Запрос на получние фильма по ID={}", id);
+        log.debug("Запрос на получение фильма по ID={}", id);
         return filmStorage.getById(id)
                 .orElseThrow(() -> {
                     log.warn("Фильм с ID={} не найден", id);

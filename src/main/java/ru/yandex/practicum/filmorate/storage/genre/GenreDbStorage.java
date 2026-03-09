@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.genre;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -13,11 +14,12 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
+@Component("genreDbStorage")
 public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
     private Genre makeGenre(ResultSet rs) throws SQLException {
-        return new Genre(rs.getInt("id"), rs.getString("name"));
+        return new Genre(rs.getLong("id"), rs.getString("name"));
     }
 
     @Override
@@ -27,7 +29,7 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Optional<Genre> getById(Integer id) {
+    public Optional<Genre> getById(Long id) {
         String sql = "SELECT * FROM genres WHERE id = ?";
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, (rs, rowNum) ->

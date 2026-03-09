@@ -45,7 +45,7 @@ public class FilmDbStorage implements FilmStorage {
                 "JOIN film_genres fg ON g.id = fg.genre_id " +
                 "WHERE fg.film_id = ? ORDER BY g.id";
         List<Genre> genres = jdbcTemplate.query(sql, (rs, rowNum) ->
-                        new Genre(rs.getInt("id"), rs.getString("name")),
+                        new Genre(rs.getLong("id"), rs.getString("name")),
                 film.getId());
         film.setGenres(new LinkedHashSet<>(genres));
     }
@@ -57,7 +57,7 @@ public class FilmDbStorage implements FilmStorage {
                 .description(rs.getString("description"))
                 .releaseDate(rs.getObject("release_date", LocalDate.class))
                 .duration(rs.getLong("duration"))
-                .mpa(new Mpa(rs.getInt("mpa_rating_id"), rs.getString("mpa_name")))
+                .mpa(new Mpa(rs.getLong("mpa_rating_id"), rs.getString("mpa_name")))
                 .build();
 
     }
@@ -74,7 +74,7 @@ public class FilmDbStorage implements FilmStorage {
             ps.setString(2, film.getDescription());
             ps.setObject(3, film.getReleaseDate());
             ps.setLong(4, film.getDuration());
-            ps.setInt(5, film.getMpa().getId());
+            ps.setLong(5, film.getMpa().getId());
             return ps;
         }, keyHolder);
 
@@ -82,7 +82,6 @@ public class FilmDbStorage implements FilmStorage {
 
         saveGenres(film);
 
-        log.info("Фильм сохранен с ID: {}", film.getId());
         return film;
     }
 
@@ -122,7 +121,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Optional<Film> getById(Long id) {
-        String sql = "SELECT f.*, m.name AS mpa_name FROM films.f " +
+        String sql = "SELECT f.*, m.name AS mpa_name FROM films f " +
                 "JOIN mpa_ratings m ON f.mpa_rating_id = m.id  WHERE f.id = ?";
 
         try {
@@ -138,20 +137,20 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addLike(Long filmId, Long userId) {
-        String sql = "INSERT INTO like (film_id, user_id) VALUES (?, ?)";
+        String sql = "INSERT INTO likes (film_id, user_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, filmId, userId);
     }
 
     @Override
     public void removeLike(Long filmId, Long userId) {
-        String sql = "DELETE FROM like WHERE film_id = ?, AND user_id = ?";
+        String sql = "DELETE FROM likes WHERE film_id = ?, AND user_id = ?";
         jdbcTemplate.update(sql, filmId, userId);
     }
 
     @Override
     public List<Film> getPopular(int count) {
         String sql = "SELECT f.*, m.name AS mpa_name FROM films f " +
-                "LEFT JOIN like l on f.id = l.film_id " +
+                "LEFT JOIN likes l ON f.id = l.film_id " +
                 "GROUP BY f.id " +
                 "ORDER BY COUNT(l.user_id) DESC LIMIT ?";
         List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), count);

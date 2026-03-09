@@ -51,7 +51,7 @@ public class FilmorateApplicationTests {
                 .description("ShortDescription")
                 .releaseDate(LocalDate.of(2000, 1, 1))
                 .duration(120L)
-                .mpa(new Mpa(1, "G"))
+                .mpa(new Mpa(1L, "G"))
                 .build();
     }
 
@@ -130,7 +130,7 @@ public class FilmorateApplicationTests {
 
     @Test
     public void testGetMpaById() {
-        Mpa mpa = mpaService.getMpaById(1);
+        Mpa mpa = mpaService.getMpaById(1L);
         assertThat(mpa).isNotNull();
         assertThat(mpa.getName()).isEqualTo("G");
     }
@@ -144,7 +144,7 @@ public class FilmorateApplicationTests {
 
     @Test
     public void testGetGenreById() {
-        Genre genre = genreService.getById(1);
+        Genre genre = genreService.getById(1L);
         assertThat(genre).isNotNull();
         assertThat(genre.getName()).isEqualTo("Комедия");
     }

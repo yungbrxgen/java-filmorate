@@ -1,11 +1,11 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -17,7 +17,7 @@ import java.util.*;
 
 @Slf4j
 @Repository
-@Qualifier("userDbStorage")
+@Component("userDbStorage")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
@@ -105,7 +105,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getFriends(Long id) {
-        String sql = "SELECT u.* FROM u " +
+        String sql = "SELECT u.* FROM users u " +
                 "JOIN friendships f ON u.id = f.friend_id " +
                 "WHERE f.user_id = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), id);
