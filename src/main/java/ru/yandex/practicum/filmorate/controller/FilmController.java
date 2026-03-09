@@ -71,6 +71,7 @@ public class FilmController {
             @RequestParam(defaultValue = "10") int count) {
         log.info("GET /films/popular?count={} - запрос на получение популярных фильмов", count);
         if (count <= 0) {
+            log.warn("Попытка получить отрицательное количество фильмов");
             throw new ValidationsException("Количество популярных фильмов должно быть положительным");
         }
         return filmService.getPopularFilms(count);
