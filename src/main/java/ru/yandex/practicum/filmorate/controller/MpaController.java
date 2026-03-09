@@ -24,7 +24,7 @@ public class MpaController {
 
     @GetMapping
     public List<Mpa> finalAll() {
-        log.info("Получен запрос на получние всех рейтингов MPA");
+        log.info("Получен запрос на получение всех рейтингов MPA");
         return mpaService.getAllMpa();
     }
 
