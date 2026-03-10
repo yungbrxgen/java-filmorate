@@ -1,6 +1,6 @@
 # Filmorate
 ## Схема базы данных Filmorate
-![схема бд](/images/table-filmorate.png)
+![схема бд](src/main/resources/images/table-filmorate.png)
 ## Примеры сложных запросов:
 ### 1. Поиск топ-10 популярных фильмов
 SELECT f.name, 
