@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -16,19 +17,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Repository
 @Primary
+@RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     private void saveGenres(Film film) {
         if (film.getGenres() == null || film.getGenres().isEmpty()) {
@@ -112,26 +109,31 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAll() {
-        String sql = "SELECT f.*, m.name AS mpa_name FROM films f " +
-                "JOIN mpa_ratings m ON f.mpa_rating_id = m.id";
-        List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
-        films.forEach(this::loadGenres);
-        return films;
+        String sql = "SELECT f.*, mr.name AS mpa_name, g.id AS genre_id, g.name AS genre_name " +
+                "FROM films f " +
+                "LEFT JOIN mpa_ratings mr ON f.mpa_rating_id = mr.id " +
+                "LEFT JOIN film_genres fg ON f.id = fg.film_id " +
+                "LEFT JOIN genres g ON fg.genre_id = g.id " +
+                "ORDER BY f.id";
+        return getFilmsByQuery(sql);
     }
 
     @Override
     public Optional<Film> getById(Long id) {
-        String sql = "SELECT f.*, m.name AS mpa_name FROM films f " +
-                "JOIN mpa_ratings m ON f.mpa_rating_id = m.id  WHERE f.id = ?";
+        String sql = "SELECT f.*, mr.name AS mpa_name, g.id AS genre_id, g.name AS genre_name " +
+                "FROM films f " +
+                "LEFT JOIN mpa_ratings mr ON f.mpa_rating_id = mr.id " +
+                "LEFT JOIN film_genres fg ON f.id = fg.film_id " +
+                "LEFT JOIN genres g ON fg.genre_id = g.id " +
+                "WHERE f.id = ?";
 
-        try {
-            Film film = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs), id);
-            if (film != null) {
-                loadGenres(film);
-            }
-            return Optional.ofNullable(film);
-        } catch (EmptyResultDataAccessException e) {
+        List<Film> films = getFilmsByQuery(sql, id);
+
+        if (films.isEmpty()) {
             return Optional.empty();
+        } else {
+            Film foundFilm = films.get(0);
+            return Optional.of(foundFilm);
         }
     }
 
@@ -149,15 +151,46 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopular(int count) {
-        String sql = "SELECT f.*, m.name AS mpa_name " +
+        String sql = "SELECT f.*, mr.name AS mpa_name, g.id AS genre_id, g.name AS genre_name, " +
+                "COUNT(l.user_id) AS likes_count " +
                 "FROM films f " +
+                "LEFT JOIN mpa_ratings mr ON f.mpa_rating_id = mr.id " +
+                "LEFT JOIN film_genres fg ON f.id = fg.film_id " +
+                "LEFT JOIN genres g ON fg.genre_id = g.id " +
                 "LEFT JOIN likes l ON f.id = l.film_id " +
-                "LEFT JOIN mpa_ratings m ON f.mpa_rating_id = m.id " +
-                "GROUP BY f.id, m.name " +
-                "ORDER BY COUNT(l.user_id) DESC " +
+                "GROUP BY f.id, mr.name, g.id, g.name " +
+                "ORDER BY likes_count DESC, f.id " +
                 "LIMIT ?";
-        List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), count);
-        films.forEach(this::loadGenres);
-        return films;
+        return getFilmsByQuery(sql, count);
+    }
+
+    private List<Film> getFilmsByQuery(String sql, Object... params) {
+        Map<Long, Film> filmsMap = new LinkedHashMap<>();
+
+        jdbcTemplate.query(sql, (rs, rowNum) -> {
+            long filmId = rs.getLong("id");
+            Film film = filmsMap.get(filmId);
+
+            if (film == null) {
+                film = Film.builder()
+                        .id(filmId)
+                        .name(rs.getString("name"))
+                        .description(rs.getString("description"))
+                        .releaseDate(rs.getDate("release_date").toLocalDate())
+                        .duration(rs.getLong("duration"))
+                        .mpa(new Mpa(rs.getLong("mpa_rating_id"), rs.getString("mpa_name")))
+                        .genres(new LinkedHashSet<>())
+                        .build();
+                filmsMap.put(filmId, film);
+            }
+
+            long genreId = rs.getLong("genre_id");
+            if (genreId > 0) {
+                film.getGenres().add(new Genre(genreId, rs.getString("genre_name")));
+            }
+            return film;
+        }, params);
+
+        return new ArrayList<>(filmsMap.values());
     }
 }
