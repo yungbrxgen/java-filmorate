@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 @Primary
-public class MpaBdStorage implements MpaStorage {
+public class MpaDbStorage implements MpaStorage {
     private final JdbcTemplate jdbcTemplate;
 
     private Mpa makeMpa(ResultSet rs) throws SQLException {
